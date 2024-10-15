@@ -16,8 +16,8 @@ parser.add_argument('--caption_suffix', type=str, default=".txt", help='Suffix f
 parser.add_argument('--tags_suffix', type=str, default=".ttxt", help='Suffix for the tag files')
 args = parser.parse_args()
 
-#model_name_or_path="Minthy/ToriiGate-v0.3"
-model_name_or_path = ".\\ToriiGate-v0.3"
+model_name_or_path="Minthy/ToriiGate-v0.3"
+#model_name_or_path = ".\\ToriiGate-v0.3"
 caption_suffix=args.caption_suffix #suffix for generated captions
 tags_suffix=args.tags_suffix #suggix for file with booru tags
 use_tags=args.use_tags #set to True for using with reference tags
