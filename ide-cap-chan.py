@@ -19,7 +19,7 @@ args = parser.parse_args()
 model_name_or_path="Minthy/ToriiGate-v0.3"
 #model_name_or_path = ".\\ToriiGate-v0.3"
 caption_suffix=args.caption_suffix #suffix for generated captions
-tags_suffix=args.tags_suffix #suggix for file with booru tags
+tags_suffix=args.tags_suffix #suffix for file with booru tags
 use_tags=args.use_tags #set to True for using with reference tags
 image_extensions=[".jpg",".png",".webp",".jpeg"]
 
