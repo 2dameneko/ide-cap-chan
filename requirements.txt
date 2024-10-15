@@ -1,0 +1,5 @@
+git+https://github.com/huggingface/transformers
+accelerate
+bitsandbytes
+#bitsandbytes-windows
+#flash-attn
