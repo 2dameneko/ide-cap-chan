@@ -2,17 +2,17 @@
 ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3 architecture.
 
 ## Features
-* Batch caption generation for Idefics3-8B-Llama3 models.
-* Support for additional tag files to enhance captions.
-* Interrupting and resuming the captioning process.
-* Recursive processing of subfolders in the specified input folder.
+* Batch caption generation for Idefics3-8B-Llama3 models
+* Support for additional tag files to enhance captions
+* Interrupting and resuming the captioning process
+* Recursive processing of subfolders in the specified input folder
 
 ## Requirements
-* A video card with 24GB VRAM is required.
+* A video card with 24GB VRAM
 
 ## Installation
-1. Clone the repository: `git clone https://github.com/your-username/ide-cap-chan`
-2. On Windows: run `install.bat`, on Linux = make venv and run `pip install -r requirements.txt`
+1. Clone the repository: `git clone https://github.com/2dameneko/ide-cap-chan`
+2. On Windows: run `install.bat`, on Linux: make venv and run `pip install -r requirements.txt`
 
 ## Usage
 1. Place images and corresponding tag files in the input folder (default: `2tag`).
