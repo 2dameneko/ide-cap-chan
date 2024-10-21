@@ -156,8 +156,6 @@ def main():
         if use_nf4:
             model_name_or_path = "2dameneko/ToriiGate-v0.3-nf4"
 
-    print(model_name_or_path)
-    
     caption_suffix = args.caption_suffix
     tags_suffix = args.tags_suffix
     use_tags = args.use_tags
