@@ -1,16 +1,33 @@
 @echo off
 
-set "VENV_DIR=%~dp0%venv"
+REM Set the directory for the virtual environment
+set "VENV_DIR=%~dp0venv"
 
-dir "%VENV_DIR%\Scripts\Python.exe"
-if %ERRORLEVEL% == 0 goto :activate
-
-python -m venv --system-site-packages venv
+REM Check if the virtual environment already exists
+if exist "%VENV_DIR%\Scripts\Python.exe" (
+    echo Virtual environment already found at %VENV_DIR%.
+    exit /b 1
+) else (
+    REM Create the virtual environment
+    python -m venv --system-site-packages venv
+    goto :activate
+)
 
 :activate
+REM Activate the virtual environment
 call "%VENV_DIR%\Scripts\activate.bat"
+
+REM Upgrade pip
 python -m pip install --upgrade pip
+
+REM Install PyTorch and related packages
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+REM Install project requirements
 pip install -r requirements.txt
 
+REM Create a directory captioning
 md 2tag
+
+REM End of script
+echo Virtual environment setup complete.
