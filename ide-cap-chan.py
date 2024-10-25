@@ -136,16 +136,15 @@ def main():
     parser.add_argument('--input_dir', type=str, default="./2tag", help='Path to the folder containing images')
     parser.add_argument('--CUDA_VISIBLE_DEVICES', type=str, default="0", help='Comma-separated list of CUDA devices. WARNING: multi-GPU captioning can overload your power supply unit')
     parser.add_argument('--caption_suffix', type=str, default=".txt", help='Extension for generated caption files')
-    parser.add_argument('--use_tags', type=bool, default=True, help='Use existing *booru tags to enhance captioning')
+    parser.add_argument('--dont_use_tags', default=False, action='store_true', help='Use existing *booru tags to enhance captioning')
     parser.add_argument('--tags_suffix', type=str, default=".ttxt", help='Extension for existing *booru tag files')
-    parser.add_argument('--use_local', type=bool, default=False, help='Use local model')
-    parser.add_argument('--use_nf4', type=bool, default=True, help='Use nf4 quantized smaller size model')
+    parser.add_argument('--use_local', default=False, action='store_true', help='Use local model')
+    parser.add_argument('--use_fp16', default=False, action='store_true', help='Use fp16 instead nf4 quantized smaller size model')
     args = parser.parse_args()
 
     device_ids = list(map(int, args.CUDA_VISIBLE_DEVICES.split(',')))
-
     use_local = args.use_local
-    use_nf4 = args.use_nf4
+    use_nf4 = not args.use_fp16
 
     if use_local:
         model_name_or_path = "./ToriiGate-v0.3"
@@ -158,7 +157,7 @@ def main():
 
     caption_suffix = args.caption_suffix
     tags_suffix = args.tags_suffix
-    use_tags = args.use_tags
+    use_tags = not args.dont_use_tags
     input_dir = args.input_dir
     image_extensions = [".jpg", ".png", ".webp", ".jpeg"]
 
@@ -180,7 +179,7 @@ def main():
     for root, dirs, files in walk(input_dir):
         for file in files:
             file_path = Path(root) / file
-            if file_path.suffix == caption_suffix:
+            if file_path.suffix.lower() == caption_suffix:
                 path, _ = opsplit(str(file_path))
                 existing_captions.append(path)
     # print(existing_captions)
@@ -189,7 +188,7 @@ def main():
     for root, dirs, files in walk(input_dir):
         for file in files:
             file_path = Path(root) / file
-            if any(file_path.suffix == ext for ext in image_extensions):
+            if any(file_path.suffix.lower() == ext for ext in image_extensions):
                 path, _ = opsplit(str(file_path))
                 if path not in existing_captions:
                     filelist.append(file_path)
