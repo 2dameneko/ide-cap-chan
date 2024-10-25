@@ -30,15 +30,16 @@ Additional command line arguments: `python ide-cap-chan.py -h`
 * `--input_dir` - path to the folder containing images. Default `2tag`
 * `--CUDA_VISIBLE_DEVICES` comma-separated list of CUDA devices. Default `0`. WARNING: multi-GPU captioning can overload your power supply unit
 * `--caption_suffix` Extension for generated caption files. Default `.ttxt`
-* `--use_tags` Use existing *booru tags to enhance captioning. Default `True`
+* `--dont_use_tags` Don't use existing *booru tags to enhance captioning. Default `False`
 * `--tags_suffix` Extension for existing *booru tag files. Default `.txt`
-* `--use_local` Use local model. Default `False`
-* `--use_nf4` Use nf4 quantized smaller size model. Default `True`
+* `--use_local` Use existing local model. Default `False`
+* `--use_fp16` Use fp16 instead nf4 quantized smaller size model. Default `False`
 
 ## File formats supported:
 `.jpg`, `.png`, `.webp`,`.jpeg`
 
 ## Version history
+* 0.3: Reworked 'using' args, fixed minor bug with file extension case
 * 0.2:
   * Support for multi-GPU captioning (-h for command line args) with proportional workload balancing
   * Support of nf4 quants, enabled by default. ~5Gb model size instead of ~18Gb (but only for single GPU)
