@@ -21,7 +21,7 @@ REM Upgrade pip
 python -m pip install --upgrade pip
 
 REM Install PyTorch and related packages
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install torch==2.4.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
 REM Install project requirements
 pip install -r requirements.txt
