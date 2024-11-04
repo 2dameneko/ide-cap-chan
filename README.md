@@ -1,17 +1,21 @@
 # ide-cap-chan
-ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3 architecture.
+ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3 or llava-v1.6 architecture.
 
 ## Features
-* Batch caption generation for Idefics3-8B-Llama3 models
+* Batch caption generation for Idefics3-8B-Llama3 or llava-v1.6 models
 * Support for multi-GPU captioning
-* Support of [nf4 quants](https://huggingface.co/2dameneko/ToriiGate-v0.3-nf4) for lower VRAM requirements
+* Support of nf4 quants for lower VRAM requirements:
+  - [ToriiGate-v0.3-nf4](https://huggingface.co/2dameneko/ToriiGate-v0.3-nf4)
+  - [llava-v1.6-mistral-7b-hf-nf4](https://huggingface.co/2dameneko/llava-v1.6-mistral-7b-hf-nf4)
+  - [Idefics3-8B-Llama3-nf4](https://huggingface.co/2dameneko/Idefics3-8B-Llama3-nf4)
+
 * Support for huggingface/local/external models
 * Support for additional tag files to enhance captions
 * Interrupting and resuming the captioning process
 * Recursive processing of subfolders in the specified input folder
 
 ## Requirements
-* A video card CUDA support
+* A video card with CUDA support
 
 ## Installation
 1. Clone the repository: `git clone https://github.com/2dameneko/ide-cap-chan`
@@ -27,18 +31,19 @@ ide-cap-chan is a utility for batch captioning images with natural language usin
 ## Options
 By default, no command line arguments are required.
 Additional command line arguments: `python ide-cap-chan.py -h`
-* `--input_dir` - path to the folder containing images. Default `2tag`
+* `--model_path` - Path to the used model. Default `2dameneko/ToriiGate-v0.3-nf4`
+* `--model_type` - Model type (supported arhictectures: Idefics3, llava). Default `idefics3`
+* `--input_dir` - Path to the folder containing images. Default `2tag`
 * `--CUDA_VISIBLE_DEVICES` comma-separated list of CUDA devices. Default `0`. WARNING: multi-GPU captioning can overload your power supply unit
 * `--caption_suffix` Extension for generated caption files. Default `.ttxt`
 * `--dont_use_tags` Don't use existing *booru tags to enhance captioning. Default `False`
-* `--tags_suffix` Extension for existing *booru tag files. Default `.txt`
-* `--use_local` Use existing local model. Default `False`
-* `--use_fp16` Use fp16 instead nf4 quantized smaller size model. Default `False`
+* `--tags_suffix` Extension for existing *booru tag files. Default `.txt`'Extension for existing *booru tag files')
 
 ## File formats supported:
 `.jpg`, `.png`, `.webp`,`.jpeg`
 
 ## Version history
+* 0.4: Added `llava` architecture support. Reworked args. Removed temporally pinned pytorch ver to 2.4.1 due bugged 2.5 release. Now it's all ok with pytorch 2.5.1
 * 0.3: Reworked 'using' args, fixed minor bug with file extension case
 * 0.2:
   * Support for multi-GPU captioning (-h for command line args) with proportional workload balancing

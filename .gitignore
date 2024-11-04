@@ -129,14 +129,19 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+Backup/
 
 #Models
-ToriiGate-v0.2/
-ToriiGate-v0.3/
-ToriiGate-v0.3-nf4/
+.safetensors
+.model
+.json
 
 #Images
 2tag/
+.jpg
+.jpeg
+.webp
+.png
 
 # Spyder project settings
 .spyderproject

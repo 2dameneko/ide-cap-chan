@@ -1,7 +1,7 @@
-# ide-cap-chan v0.2
+# ide-cap-chan v0.4
 import torch
 import time
-from transformers import AutoProcessor, AutoModelForVision2Seq
+from transformers import AutoProcessor, AutoModel, AutoTokenizer, AutoModelForVision2Seq, LlavaNextForConditionalGeneration
 from transformers.image_utils import load_image
 from tqdm import tqdm
 from pathlib import Path
@@ -36,7 +36,7 @@ def split_files_proportionally(filelist, speeds):
 
     return chunks
 
-def process_images(rank, model_name_or_path, caption_suffix, tags_suffix, use_tags, use_quants, filelist_chunks):
+def process_images(rank, input_model_type, model_name_or_path, caption_suffix, tags_suffix, use_tags, use_quants, filelist_chunks):
     """Process images and generate captions."""
     gpu_id, filelist = filelist_chunks[rank]
     device = f"cuda:{gpu_id}"
@@ -53,8 +53,15 @@ def process_images(rank, model_name_or_path, caption_suffix, tags_suffix, use_ta
 
     # quantization_config = BitsAndBytesConfig(load_in_8bit=True)
 
+    if input_model_type == 'idefics3':
+        model_class = AutoModelForVision2Seq
+        splitter = "Assistant: "
+    elif input_model_type == 'llava':
+        model_class = LlavaNextForConditionalGeneration
+        splitter = "[/INST] "      
+    
     processor = AutoProcessor.from_pretrained(model_name_or_path)
-    model = AutoModelForVision2Seq.from_pretrained(
+    model = model_class.from_pretrained(
         model_name_or_path,
         torch_dtype=torch.bfloat16,
         low_cpu_mem_usage=use_quants
@@ -98,6 +105,7 @@ def process_images(rank, model_name_or_path, caption_suffix, tags_suffix, use_ta
                 print(err)
                 continue
 
+        # Idefics3 default        
         messages = [
             {
             #Important!
@@ -116,6 +124,18 @@ def process_images(rank, model_name_or_path, caption_suffix, tags_suffix, use_ta
             }
         ]
 
+        # llava default
+        # Non needed, can be used with Idefics'
+        # messages = [
+        #     {
+        #         "role": "user",
+        #         "content": [
+        #             {"type": "text", "text": "What is shown in this image?"},
+        #             {"type": "image"},
+        #         ],
+        #     },
+        # ]
+
         prompt = processor.apply_chat_template(messages, add_generation_prompt=True)
         inputs = processor(text=prompt, images=[image], return_tensors="pt")
         inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -124,7 +144,7 @@ def process_images(rank, model_name_or_path, caption_suffix, tags_suffix, use_ta
         with torch.no_grad():
             generated_ids = model.generate(**inputs, max_new_tokens=500)
             generated_texts = processor.batch_decode(generated_ids, skip_special_tokens=True)
-            caption = generated_texts[0].split("Assistant: ")[1]
+            caption = generated_texts[0].split(splitter)[1]
             gcollect()
             torch.cuda.empty_cache()
 
@@ -133,27 +153,33 @@ def process_images(rank, model_name_or_path, caption_suffix, tags_suffix, use_ta
 
 def main():
     parser = ArgumentParser(description='Generate captions for images')
+    parser.add_argument('--model_path', type=str, default="", help='Path to the used model')
+    parser.add_argument('--model_type', type=str, default="idefics3", help='Model type (supported arhictectures: Idefics3, llava)')
     parser.add_argument('--input_dir', type=str, default="./2tag", help='Path to the folder containing images')
     parser.add_argument('--CUDA_VISIBLE_DEVICES', type=str, default="0", help='Comma-separated list of CUDA devices. WARNING: multi-GPU captioning can overload your power supply unit')
     parser.add_argument('--caption_suffix', type=str, default=".txt", help='Extension for generated caption files')
     parser.add_argument('--dont_use_tags', default=False, action='store_true', help='Use existing *booru tags to enhance captioning')
     parser.add_argument('--tags_suffix', type=str, default=".ttxt", help='Extension for existing *booru tag files')
-    parser.add_argument('--use_local', default=False, action='store_true', help='Use local model')
-    parser.add_argument('--use_fp16', default=False, action='store_true', help='Use fp16 instead nf4 quantized smaller size model')
     args = parser.parse_args()
 
     device_ids = list(map(int, args.CUDA_VISIBLE_DEVICES.split(',')))
-    use_local = args.use_local
-    use_nf4 = not args.use_fp16
 
-    if use_local:
-        model_name_or_path = "./ToriiGate-v0.3"
-        if use_nf4:
-            model_name_or_path += "-nf4"
-    else:
-        model_name_or_path = "Minthy/ToriiGate-v0.3"
-        if use_nf4:
+    supported_model_types = ["idefics3", "llava"]
+    input_model_type = args.model_type.lower()
+    if not any(input_model_type == model_type for model_type in supported_model_types):
+        print("Model type " + "input_model_type" + " not supported. Supported arhictectures: Idefics3, llava.")
+        quit()
+
+    model_name_or_path = args.model_path
+    if model_name_or_path == '':
+        if input_model_type == 'idefics3':
             model_name_or_path = "2dameneko/ToriiGate-v0.3-nf4"
+            # You can replace it with the original not finetuned Idefics3, but it doesn't seem to have any pros:
+            # model_name_or_path = "2dameneko/Idefics3-8B-Llama3-nf4"            
+        elif input_model_type == 'llava':
+            model_name_or_path = "2dameneko/llava-v1.6-mistral-7b-hf-nf4"        
+    
+    use_nf4 = str(model_name_or_path).endswith('-nf4')
 
     caption_suffix = args.caption_suffix
     tags_suffix = args.tags_suffix
@@ -172,7 +198,7 @@ def main():
     print("id | speed")
     for gpu_id, gpu_speed in gpu_speeds:
         print(f"  {gpu_id}|  {gpu_speed:.2f}")
-    print(f'Using model: {model_name_or_path}')
+    print(f'Using model: {model_name_or_path} (type: {input_model_type})')
     print(f'Use quants: {use_quants}')
 
     existing_captions = []
@@ -196,7 +222,7 @@ def main():
     
     filelist_chunks = split_files_proportionally(filelist, gpu_speeds)
 
-    mp.spawn(process_images, args=(model_name_or_path, caption_suffix, tags_suffix, use_tags, use_quants, filelist_chunks), nprocs=world_size, join=True)
+    mp.spawn(process_images, args=(input_model_type, model_name_or_path, caption_suffix, tags_suffix, use_tags, use_quants, filelist_chunks), nprocs=world_size, join=True)
 
 if __name__ == "__main__":
     main()
