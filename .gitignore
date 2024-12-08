@@ -135,6 +135,13 @@ Backup/
 .safetensors
 .model
 .json
+Idefics3-8B-Llama3/
+Idefics3-8B-Llama3-nf4/
+llama-joycaption-alpha-two-hf-llava/
+llava-v1.6-mistral-7b-hf/
+llava-v1.6-mistral-7b-hf-nf4/
+ToriiGate-v0.3/
+ToriiGate-v0.3-nf4/
 
 #Images
 2tag/

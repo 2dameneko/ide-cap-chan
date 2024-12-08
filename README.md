@@ -2,7 +2,7 @@
 ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3 or llava-v1.6 architecture.
 
 ## Features
-* Batch caption generation for Idefics3-8B-Llama3 or llava-v1.6 models
+* Batch caption generation for Idefics3-8B-Llama3, llava-v1.6 or llama-joycaption-alpha-two-hf-llava models
 * Support for multi-GPU captioning
 * Support of nf4 quants for lower VRAM requirements:
   - [ToriiGate-v0.3-nf4](https://huggingface.co/2dameneko/ToriiGate-v0.3-nf4)
@@ -32,7 +32,7 @@ ide-cap-chan is a utility for batch captioning images with natural language usin
 By default, no command line arguments are required.
 Additional command line arguments: `python ide-cap-chan.py -h`
 * `--model_path` - Path to the used model. Default `2dameneko/ToriiGate-v0.3-nf4`
-* `--model_type` - Model type (supported arhictectures: Idefics3, llava). Default `idefics3`
+* `--model_type` - Model type (supported arhictectures: Idefics3, llava, joy-caption). Default `idefics3`
 * `--input_dir` - Path to the folder containing images. Default `2tag`
 * `--CUDA_VISIBLE_DEVICES` comma-separated list of CUDA devices. Default `0`. WARNING: multi-GPU captioning can overload your power supply unit
 * `--caption_suffix` Extension for generated caption files. Default `.ttxt`
@@ -43,6 +43,7 @@ Additional command line arguments: `python ide-cap-chan.py -h`
 `.jpg`, `.png`, `.webp`,`.jpeg`
 
 ## Version history
+* 0.5: Added `joy-caption` architecture support. Refactored.
 * 0.4: Added `llava` architecture support. Reworked args. Removed temporally pinned pytorch ver to 2.4.1 due bugged 2.5 release. Now it's all ok with pytorch 2.5.1
 * 0.3: Reworked 'using' args, fixed minor bug with file extension case
 * 0.2:
@@ -57,7 +58,11 @@ Additional command line arguments: `python ide-cap-chan.py -h`
 [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 ## Credits
-Finetune: [https://huggingface.co/Minthy/ToriiGate-v0.3](https://huggingface.co/Minthy/ToriiGate-v0.3)
-Architecture: [https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3](https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3)
+Idefics3 Finetuned model: [https://huggingface.co/Minthy/ToriiGate-v0.3](https://huggingface.co/Minthy/ToriiGate-v0.3)
+Ifdefics3 Architecture and model: [https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3](https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3)
+llava Architecture: [https://huggingface.co/docs/transformers/main/model_doc/llava](https://huggingface.co/docs/transformers/main/model_doc/llava)
+llava model: [https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf](https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf)
+Portions of code for joy-caption support: [https://github.com/fpgaminer/joycaption](https://github.com/fpgaminer/joycaption)
+Joy-caption model: [https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava](https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava)
 
 Thank you for your interest in ide-cap-chan!
