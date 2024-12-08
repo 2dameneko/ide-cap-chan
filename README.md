@@ -1,5 +1,5 @@
 # ide-cap-chan
-ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3 or llava-v1.6 architecture.
+ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3, llava-v1.6 or joy-caption architecture.
 
 ## Features
 * Batch caption generation for Idefics3-8B-Llama3, llava-v1.6 or llama-joycaption-alpha-two-hf-llava models
@@ -58,11 +58,11 @@ Additional command line arguments: `python ide-cap-chan.py -h`
 [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 ## Credits
-Idefics3 Finetuned model: [https://huggingface.co/Minthy/ToriiGate-v0.3](https://huggingface.co/Minthy/ToriiGate-v0.3)
-Ifdefics3 Architecture and model: [https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3](https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3)
-llava Architecture: [https://huggingface.co/docs/transformers/main/model_doc/llava](https://huggingface.co/docs/transformers/main/model_doc/llava)
-llava model: [https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf](https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf)
-Portions of code for joy-caption support: [https://github.com/fpgaminer/joycaption](https://github.com/fpgaminer/joycaption)
-Joy-caption model: [https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava](https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava)
+  - Idefics3 finetuned model: [https://huggingface.co/Minthy/ToriiGate-v0.3](https://huggingface.co/Minthy/ToriiGate-v0.3)
+  - Ifdefics3 architecture and model: [https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3](https://huggingface.co/HuggingFaceM4/Idefics3-8B-Llama3)
+  - llava architecture: [https://huggingface.co/docs/transformers/main/model_doc/llava](https://huggingface.co/docs/transformers/main/model_doc/llava)
+  - llava model: [https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf](https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf)
+  - Portions of code for joy-caption support: [https://github.com/fpgaminer/joycaption](https://github.com/fpgaminer/joycaption)
+  - Joy-caption model: [https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava](https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava)
 
 Thank you for your interest in ide-cap-chan!
