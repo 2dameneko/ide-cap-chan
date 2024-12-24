@@ -1,0 +1,1 @@
+del .\2tag\*.txt
