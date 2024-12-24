@@ -1,5 +1,5 @@
 # ide-cap-chan
-ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3 or llava-v1.6 architecture.
+ide-cap-chan is a utility for batch captioning images with natural language using models with Idefics3-8B-Llama3, llava-v1.6, Llama JoyCaption, Qwen2-VL-7B-Instruct, Molmo and Pixtral architecture.
 
 ## Features
 * Batch caption generation for Idefics3-8B-Llama3, llava-v1.6, Llama JoyCaption Alpha Two, Qwen2-VL-7B-Instruct, Molmo-7B-D, Molmo-7B-O, Molmo-72B, Pixtral models
