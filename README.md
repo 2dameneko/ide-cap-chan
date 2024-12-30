@@ -12,7 +12,7 @@ ide-cap-chan is a utility for batch captioning images with natural language usin
   - [Llama JoyCaption Alpha Two](https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava)  
   - [Qwen2-VL-7B-Captioner-Relaxed](https://huggingface.co/Ertugrul/Qwen2-VL-7B-Captioner-Relaxed)
   - [Molmo-7B-O](https://huggingface.co/cyan2k/molmo-7B-O-bnb-4bit)
-  - [Molmo-7B](https://huggingface.co/SeanScripts/Molmo-72B-0924-nf4)
+  - [Molmo-72B](https://huggingface.co/SeanScripts/Molmo-72B-0924-nf4)
   - [Pixtral-12B-Captioner-Relaxed](https://huggingface.co/Ertugrul/Pixtral-12B-Captioner-Relaxed)
 * Support for huggingface/local/external models
 * Support for additional tag files to enhance captions
