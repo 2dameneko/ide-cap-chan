@@ -4,15 +4,16 @@ ide-cap-chan is a utility for batch captioning images with natural language usin
 ## Features
 * Batch caption generation for Idefics3-8B-Llama3, llava-v1.6, Llama JoyCaption Alpha Two, Qwen2-VL-7B-Instruct, Molmo-7B-D, Molmo-7B-O, Molmo-72B, Pixtral models
 * Support for multi-GPU captioning
-* Support of nf4 quants for lower VRAM requirements:
+* Support of fp16 or nf4 quants for lower VRAM requirements
+* Default models (You can specify any other supported architectural model):
   - [ToriiGate-v0.3-nf4](https://huggingface.co/2dameneko/ToriiGate-v0.3-nf4)
   - [Idefics3-8B-Llama3-nf4](https://huggingface.co/2dameneko/Idefics3-8B-Llama3-nf4)
   - [llava-v1.6-mistral-7b-hf-nf4](https://huggingface.co/2dameneko/llava-v1.6-mistral-7b-hf-nf4)
   - [Llama JoyCaption Alpha Two](https://huggingface.co/fancyfeast/llama-joycaption-alpha-two-hf-llava)  
-  - [Qwen2-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2-VL-7B-Instruct)
-  - [Molmo](https://huggingface.co/collections/allenai/molmo-66f379e6fe3b8ef090a8ca19)
-  - [Pixtral](https://huggingface.co/docs/transformers/model_doc/pixtral)
-  
+  - [Qwen2-VL-7B-Captioner-Relaxed](https://huggingface.co/Ertugrul/Qwen2-VL-7B-Captioner-Relaxed)
+  - [Molmo-7B-O](https://huggingface.co/cyan2k/molmo-7B-O-bnb-4bit)
+  - [Molmo-7B](https://huggingface.co/SeanScripts/Molmo-72B-0924-nf4)
+  - [Pixtral-12B-Captioner-Relaxed](https://huggingface.co/Ertugrul/Pixtral-12B-Captioner-Relaxed)
 * Support for huggingface/local/external models
 * Support for additional tag files to enhance captions
 * Interrupting and resuming the captioning process
