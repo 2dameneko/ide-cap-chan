@@ -1,4 +1,9 @@
 # ide-cap-chan
+
+<div align="center">
+    <img src="https://count.getloli.com/get/@ide-cap-chan?theme=asoul&padding=4" /><br>
+</div>
+
 ide-cap-chan is a utility for batch captioning images with natural language using various VL models.
 
 ## Features
