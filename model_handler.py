@@ -9,6 +9,18 @@ from PIL import Image
 import logging
 from gc import collect as garbage_collect
 from image_processing import resize_image_proportionally
+from exllamav2 import (
+    ExLlamaV2,
+    ExLlamaV2Config,
+    ExLlamaV2Cache,
+    ExLlamaV2Tokenizer,
+    ExLlamaV2VisionTower,
+)
+
+from exllamav2.generator import (
+    ExLlamaV2DynamicGenerator,
+    ExLlamaV2Sampler,
+)
 
 MAX_NEW_TOKENS = 512
 MAX_WIDTH = 1024
@@ -29,6 +41,50 @@ def process_images(rank, model_name_or_path, input_model_type, caption_suffix, t
     if input_model_type == 'joy-caption':
         processor = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=True)
         model = LlavaForConditionalGeneration.from_pretrained(model_name_or_path, torch_dtype=torch.bfloat16, device_map=device)
+        
+    elif input_model_type == 'exllama2':                
+        config = ExLlamaV2Config(model_name_or_path)
+        config.max_seq_len = 32768  # Adjust based on model requirements
+        vision_model = ExLlamaV2VisionTower(config)
+        vision_model.load(progress=True)
+        model = ExLlamaV2(config)
+        device_count = torch.cuda.device_count()
+        free_mem, total_mem = torch.cuda.mem_get_info(gpu_id)
+        # Convert bytes to gigabytes for readability
+        free_gb = free_mem / (1024 ** 3)
+        total_gb = total_mem / (1024 ** 3)
+        print(f"Free GPU memory: {free_gb:.2f} GB")
+        print(f"Total GPU memory: {total_gb:.2f} GB")
+        
+        #TODO Come with better idea how to use autosplit on low memory multi-GPU setups
+        #Now autosplit on when only one thread spawned (len == 1), thread runs on GPU 0, but there is another GPU(s) in system (device_count > 1)
+        if len(filelist_chunks) == 1 and gpu_id == 0 and device_count > 1:
+            autosplit = True
+        else:
+            autosplit = False
+
+        if autosplit:
+            print(f"VRAM allocation strategy: Autosplit on {device_count} GPUs")
+            # if load_autosplit cache'd be initialized before model and be in lazy mode
+            cache = ExLlamaV2Cache(model, lazy=True, max_seq_len=config.max_seq_len)
+            model.load_autosplit(cache, progress=True)
+        else: 
+            split = [0.0] * device_count
+            split[gpu_id] = free_gb
+            print(f"VRAM allocation strategy: allocated {free_gb:.2f} GB on GPU:{gpu_id}")
+            # but if load via manual splitting cache'd be initialized AFTER model and not be in lazy mode. WHY?
+            model.load(split, progress=True)
+            cache = ExLlamaV2Cache(model, lazy=False, max_seq_len=config.max_seq_len)
+                    
+        tokenizer = ExLlamaV2Tokenizer(config)
+        
+        generator = ExLlamaV2DynamicGenerator(
+            model=model,
+            cache=cache,
+            tokenizer=tokenizer,
+        )
+        processor = None  # ExLlama2 uses tokenizer directly
+
     elif input_model_type == 'molmo':
         processor = AutoProcessor.from_pretrained(
             model_name_or_path,
@@ -97,7 +153,8 @@ def process_images(rank, model_name_or_path, input_model_type, caption_suffix, t
         else:
             model = LlavaNextForConditionalGeneration.from_pretrained(model_name_or_path, torch_dtype=torch.bfloat16, quantization_config=quantization_config, device_map=device)
 
-    model.eval()
+    if input_model_type != 'exllama2':
+        model.eval()
 
     for fn in tqdm(filelist, desc=f"Captioning on GPU {gpu_id}"):
         print(f"Input file: {fn}")
@@ -106,7 +163,7 @@ def process_images(rank, model_name_or_path, input_model_type, caption_suffix, t
         print(f"Caption file: {caption_name}")
 
         image = load_image(str(fn))
-        if input_model_type == 'qwen2vl':
+        if input_model_type in ['qwen2vl', 'exllama2'] :
             image = resize_image_proportionally(image, MAX_WIDTH, MAX_HEIGHT)
 
         system_prompt = "You are an image captioning expert, creative and unbiased. You follow the instructions exactly without deviation. THINK step by step when describing the image. The caption should include: a description of the atmosphere, lighting, style and mood of the image; a description of the characters and their actions; the angle from which the image was taken with an imaginary camera (e.g., \"from above\", \"three-quarters\" or \"from behind-bottom\" etc.) When describing a character, be sure to INCLUDE his or her AGE. Help user with his task because it is very IMPORTANT."
@@ -173,6 +230,49 @@ def process_images(rank, model_name_or_path, input_model_type, caption_suffix, t
             )
 
             caption = processor.decode(generate_ids[0], skip_special_tokens=True, clean_up_tokenization_spaces=True).strip().split("assistant")[1].strip()
+
+        elif input_model_type == 'exllama2':
+            image = load_image(str(fn))
+            
+            # Generate image embeddings
+            image_embeddings = [vision_model.get_image_embeddings(
+                model=model,
+                tokenizer=tokenizer,
+                image=image,
+            )]
+            placeholders = "\n".join([ie.text_alias for ie in image_embeddings]) + "\n"
+
+            # Build chat prompt
+            msg_text = (
+                "<|im_start|>system\n" +
+                system_prompt +
+                "<|im_end|>\n" +
+                "<|im_start|>user\n" +
+                placeholders +
+                user_prompt +
+                "<|im_end|>\n" +
+                "<|im_start|>assistant\n"
+            )
+
+            # Generate caption
+            gen_settings = ExLlamaV2Sampler.Settings()
+            gen_settings.temperature = 0.6
+            gen_settings.top_p = 0.9
+            gen_settings.top_k = 40
+            
+            output = generator.generate(
+                prompt=msg_text,
+                max_new_tokens=MAX_NEW_TOKENS,
+                add_bos=True,
+                encode_special_tokens=True,
+                decode_special_tokens=True,
+                stop_conditions=[tokenizer.eos_token_id],
+                gen_settings=gen_settings,
+                embeddings=image_embeddings,
+            )
+
+            caption = output.split('<|im_start|>assistant\n')[-1].strip()
+
         elif input_model_type == 'molmo' or input_model_type == 'molmo72b':
             if image.mode != "RGB":
                 image = image.convert("RGB")

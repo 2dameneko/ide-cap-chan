@@ -1,4 +1,4 @@
-# ide-cap-chan v0.7
+# ide-cap-chan v0.8exl2
 from arg_parser import parse_arguments
 from gpu_utils import measure_gpu_speed, split_files_proportionally
 from model_handler import process_images
@@ -12,7 +12,7 @@ def main():
 
     device_ids = list(map(int, args.CUDA_VISIBLE_DEVICES.split(',')))
 
-    supported_model_types = ["idefics3", "llava", "joy-caption", "molmo", "qwen2vl", "molmo72b", "pixtral"]
+    supported_model_types = ["idefics3", "llava", "joy-caption", "molmo", "qwen2vl", "molmo72b", "pixtral", "exllama2"]
     input_model_type = args.model_type.lower()
     if input_model_type not in supported_model_types:
         print(f"Model type '{input_model_type}' not supported. Supported architectures: {', '.join(supported_model_types)}.")
@@ -25,15 +25,17 @@ def main():
         'qwen2vl': "Ertugrul/Qwen2-VL-7B-Captioner-Relaxed",
         'molmo': "cyan2k/molmo-7B-O-bnb-4bit",
         'molmo72b': "SeanScripts/Molmo-72B-0924-nf4",
-        'pixtral': "Ertugrul/Pixtral-12B-Captioner-Relaxed"        
+        'pixtral': "Ertugrul/Pixtral-12B-Captioner-Relaxed",
+        #'exllama2': "Minthy/ToriiGate-v0.4-2B-exl2-8bpw"
+        'exllama2': "Minthy/ToriiGate-v0.4-7B-exl2-8bpw"
             }[input_model_type]
 
     quant_suffixes = ["nf4", "bnb", "4bit"]
     use_nf4 = any(suffix in model_name_or_path for suffix in quant_suffixes)
 
     if input_model_type == "joy-caption" and use_nf4:
-        print(f"Model type '{input_model_type}' not supported with -nf4 quantization.")
-        return
+        print(f"Model type '{input_model_type}' not supported with -nf4 quantization. Set to false.")
+        use_nf4 = False
 
     caption_suffix = args.caption_suffix
     tags_suffix = args.tags_suffix
