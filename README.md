@@ -51,14 +51,13 @@ Run without arguments for default behavior. Available CLI options (`python ide-c
 | `--model_type` | Model architecture/loader: `idefics3`, `llava`, `joy-caption`, `molmo`, `molmo72b`, `qwen2vl`, `pixtral`, `exllama2` (default: `exllama2`) |
 | `--input_dir` | Input directory path (default: `2tag`) |
 | `--CUDA_VISIBLE_DEVICES` | Comma-separated GPU IDs (default: `0`). **Note**:<br>- Multi-GPU may strain power supplies<br>- `molmo72b` ignores this argument and auto-splits across GPUs |
-| `--caption_suffix` | Caption file extension (default: `.ttxt`) |
-| `--tags_suffix` | Tag file extension (default: `.txt`) |
+| `--caption_suffix` | Caption file extension (default: `.txt`) |
 | `--caption_format` | Output format: `json`, `markdown`, `short`, `long`, `bbox` (requires ToriiGate ≥0.4) |
-| `--add_tags` | Enhance captions with existing tag files (ToriiGate-family models) |
-| `--add_chars` | Include character information (requires ToriiGate ≥0.4) |
-| `--add_char_traits` | Include character traits (requires ToriiGate ≥0.4) |
-| `--add_info` | Include miscellaneous image info (requires ToriiGate ≥0.4) |
-| `--no_chars` | Do not add character information (requires ToriiGate ≥0.4) |
+| `--add_tags` | Enhance captions with existing tag files (ToriiGate-family models), (default: `.ttxt`) |
+| `--add_chars` | Enhance captions with character information (requires ToriiGate ≥0.4), (default: `.ttxt`) |
+| `--add_char_traits` | Enhance captions with character traits (requires ToriiGate ≥0.4), (default: `.ttxt`) |
+| `--add_info` | Enhance captions with miscellaneous image info (requires ToriiGate ≥0.4), (default: `.ttxt`) |
+| `--no_chars` | Do not add character names (requires ToriiGate ≥0.4), (default: `.ttxt`) |
 
 ## Supported File Formats
 `.jpg`, `.png`, `.webp`, `.jpeg`
