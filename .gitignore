@@ -2,7 +2,10 @@
 */
 
 # Except these
-!2tag/
+!2tag/march.jpt
+!2tag/may.jpg
+!2tag/march.txt
+!2tag/may.txt
 
 # Ignore Python bytecode files
 __pycache__/

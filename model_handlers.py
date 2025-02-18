@@ -641,4 +641,3 @@ class GenericModelHandler(ModelHandler):
         )
 
         return caption    
-s
