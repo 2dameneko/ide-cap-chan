@@ -1,7 +1,7 @@
-# ide-cap-chan v0.8exl2
+# ide-cap-chan v0.9minicpmo
 from arg_parser import parse_arguments
-from gpu_utils import measure_gpu_speed, split_files_proportionally
-from model_handler import process_images
+from utils import measure_gpu_speed, split_files_proportionally
+from image_processor import process_images
 import torch.multiprocessing as mp
 from os import walk
 from os.path import splitext as split_extension
@@ -12,10 +12,10 @@ def main():
 
     device_ids = list(map(int, args.CUDA_VISIBLE_DEVICES.split(',')))
 
-    supported_model_types = ["idefics3", "llava", "joy-caption", "molmo", "qwen2vl", "molmo72b", "pixtral", "exllama2"]
+    supported_model_types = ["idefics3", "llava", "joy-caption", "molmo", "qwen2vl", "molmo72b", "pixtral", "exllama2", "minicpmo", "generic"]
     input_model_type = args.model_type.lower()
     if input_model_type not in supported_model_types:
-        print(f"Model type '{input_model_type}' not supported. Supported architectures: {', '.join(supported_model_types)}.")
+        print(f"Model type '{input_model_type}' not supported. Supported loaders: {', '.join(supported_model_types)}.")
         return
 
     model_name_or_path = args.model_path or {
@@ -23,12 +23,15 @@ def main():
         'llava': "2dameneko/llava-v1.6-mistral-7b-hf-nf4",
         'joy-caption': "fancyfeast/llama-joycaption-alpha-two-hf-llava",
         #'qwen2vl': "Ertugrul/Qwen2-VL-7B-Captioner-Relaxed",
-        'qwen2vl': "Minthy/ToriiGate-v0.4-2B",        
+        #'qwen2vl': "Minthy/ToriiGate-v0.4-2B",        
+        'qwen2vl': "Vikhrmodels/Vikhr-2-VL-2b-Instruct-experimental",
         'molmo': "cyan2k/molmo-7B-O-bnb-4bit",
         'molmo72b': "SeanScripts/Molmo-72B-0924-nf4",
         'pixtral': "Ertugrul/Pixtral-12B-Captioner-Relaxed",
-        'exllama2': "Minthy/ToriiGate-v0.4-2B-exl2-8bpw"
-        #'exllama2': "Minthy/ToriiGate-v0.4-7B-exl2-8bpw"
+        'exllama2': "Minthy/ToriiGate-v0.4-2B-exl2-8bpw",
+        #'exllama2': "Minthy/ToriiGate-v0.4-7B-exl2-8bpw",
+        'minicpmo': "openbmb/MiniCPM-o-2_6",
+        'generic': None,
             }[input_model_type]
 
     quant_suffixes = ["nf4", "bnb", "4bit"]

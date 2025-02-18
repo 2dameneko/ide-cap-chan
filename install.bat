@@ -26,8 +26,5 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 REM Install project requirements
 pip install -r requirements.txt
 
-REM Create a directory captioning
-md 2tag
-
 REM End of script
 echo Virtual environment setup complete.

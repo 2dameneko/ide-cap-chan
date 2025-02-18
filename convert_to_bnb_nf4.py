@@ -17,7 +17,7 @@ quantization_config = BitsAndBytesConfig(
 model_name = sys.argv[1]
 
 # Load the model and tokenizer with the quantization configuration
-model = AutoModelForVision2Seq.from_pretrained(model_name, quantization_config=quantization_config, low_cpu_mem_usage = True)
+model = AutoModelForVision2Seq.from_pretrained(model_name, quantization_config=quantization_config, trust_remote_code = True, low_cpu_mem_usage = True)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # Print the original model size

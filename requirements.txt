@@ -1,12 +1,18 @@
-git+https://github.com/huggingface/transformers
-accelerate>=0.26.0
-bitsandbytes
-qwen-vl-utils
-einops>=0.5.0
-#exllamav2
-#tensorflow-cpu or #tensorflow==2.10.0
-#bitsandbytes-windows
-#flash-attn
+¹git+https://github.com/huggingface/transformers #latest, minicpm_o broken (due Loggits deprecated)
+transformers==4.48.3 #last verion minicpmo compatible
+#transformers==4.44.2 #recommended for minicpm_o, but doesn't have support for idefics3
+accelerate==1.4.0
+huggingface_hub==0.28.1
+bitsandbytes==0.45.2
+typing_extensions==4.12.2
+einops==0.8.1
+qwen-vl-utils==0.0.10
+vector-quantize-pytorch==1.21.8
+vocos==0.1.0
+soundfile==0.13.1
+librosa==0.10.2.post1
+
+http://thunlp.oss-cn-qingdao.aliyuncs.com/multi_modal/never_delete/modelscope_studio-0.4.0.9-py3-none-any.whl
 
 exllamav2@ https://github.com/turboderp/exllamav2/releases/download/v0.2.7/exllamav2-0.2.7+cu121.torch2.5.0-cp310-cp310-win_amd64.whl; platform_system == "Windows" and python_version == "3.10"
 flash_attn@ https://github.com/bdashore3/flash-attention/releases/download/v2.7.0.post2/flash_attn-2.7.0.post2+cu124torch2.5.1cxx11abiFALSE-cp310-cp310-win_amd64.whl; platform_system == "Windows" and python_version == "3.10"

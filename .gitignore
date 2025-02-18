@@ -1,17 +1,8 @@
-# Ignore all image formats
-*.jpg
-*.jpeg
-*.png
-*.bmp
-*.webp
-*.gif
-*.tiff
-*.tif
-*.svg
-*.ico
-
 # Ignore all folders
 */
+
+# Except these
+!2tag/
 
 # Ignore Python bytecode files
 __pycache__/

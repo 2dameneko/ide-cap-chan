@@ -7,10 +7,11 @@
 ide-cap-chan is a utility for batch captioning images with natural language using various Vision-Language (VL) models.
 
 ## Features
-* **High-speed processing**: Optimized for rapid batch caption generation with Qwen2-VL-7B-Instruct, Idefics3-8B-Llama3, llava-v1.6, Llama JoyCaption Alpha Two, Molmo-7B-D, Molmo-7B-O, Molmo-72B, and Pixtral models
+* **High-speed processing**: Optimized for rapid batch caption generation with ExLlama2, Qwen2-VL-7B-Instruct, Qwen2-VL-2B-Instruct (Vikhr-family included),
+    Idefics3-8B-Llama3, LLaVa-NeXT (LLaVa-1.6), Llama JoyCaption Alpha Two, Molmo-7B-O, Molmo-72B, MiniCPM-o-2_6 and Pixtral models
 * **Multi-GPU support**: Distribute workloads across multiple GPUs
-* **Efficient quantization**: Supports ExLlama2 (exl2), fp16, and nf4 quantization for reduced VRAM usage
-* **Autoload strategies**: VRAM-optimized loading for all exl2 and fp16 Molmo-72B models
+* **Efficient quantization**: Supports ExLlama2 (exl2), int8, and nf4 quantization for reduced VRAM usage
+* **Autoload strategies**: VRAM-optimized loading
 * **Model flexibility**: Use default or custom models via CLI arguments.
 * **Input flexibility**: Supports Hugging Face, local, and external models
 * **Tag integration**: Enhance captions with existing tags/captions
@@ -18,7 +19,7 @@ ide-cap-chan is a utility for batch captioning images with natural language usin
 * **Batch processing**: Recursively process subfolders in input directories
 
 ## Requirements
-* NVIDIA GPU with CUDA support (8GB VRAM minimum for llava, 12GB recommended for Qwen2-VL-7B in exl2, 2x24GB for Molmo-72B)
+* NVIDIA GPU with CUDA support (8GB VRAM minimum for llava, 12GB recommended for Qwen2-VL-7B in exl2, 48GB VRAM total for Molmo-72B)
 
 ## Installation
 1. Clone the repository:  
@@ -48,9 +49,9 @@ Run without arguments for default behavior. Available CLI options (`python ide-c
 | Argument | Description |
 |----------|-------------|
 | `--model_path` | Path to model (Hugging Face, local, or external) |
-| `--model_type` | Model architecture/loader: `idefics3`, `llava`, `joy-caption`, `molmo`, `molmo72b`, `qwen2vl`, `pixtral`, `exllama2` (default: `exllama2`) |
+| `--model_type` | Model architecture/loader: idefics3, llava, joy-caption, molmo, qwen2vl, molmo72b, pixtral, exllama2, minicpmo, generic (default: `exllama2`) |
 | `--input_dir` | Input directory path (default: `2tag`) |
-| `--CUDA_VISIBLE_DEVICES` | Comma-separated GPU IDs (default: `0`). **Note**:<br>- Multi-GPU may strain power supplies<br>- `molmo72b` ignores this argument and auto-splits across GPUs |
+| `--CUDA_VISIBLE_DEVICES` | Comma-separated GPU IDs (default: `0`). **Note**:<br>- Multi-GPU may strain your PSU<br>- `molmo72b` ignores this argument and auto-splits across GPUs |
 | `--caption_suffix` | Caption file extension (default: `.txt`) |
 | `--caption_format` | Output format: `json`, `markdown`, `short`, `long`, `bbox` (requires ToriiGate ≥0.4) |
 | `--add_tags` | Enhance captions with existing tag files (ToriiGate-family models), (default: `.ttxt`) |
@@ -63,6 +64,7 @@ Run without arguments for default behavior. Available CLI options (`python ide-c
 `.jpg`, `.png`, `.webp`, `.jpeg`
 
 ## Version History
+* **0.9**: Added MiniCPM-o-2_6 loader support, rewritten to modular design, pinned versions, 
 * **0.8**: Added ExLlama2 loader support (default), ToriiGate-v0.4 features, Molmo-72B auto-split
 * **0.7**: Added Molmo/Qwen2VL/Pixtral support, improved multi-GPU quant processing, code refactor
 * **0.6**: Internal code improvements
@@ -90,8 +92,12 @@ This project is a proof of concept and not production-ready.
 - Qwen2-VL Implementation: [MNeMoNiCuZ/qwen2-vl-7b-captioner-relaxed-batch](https://github.com/MNeMoNiCuZ/qwen2-vl-7b-captioner-relaxed-batch)
 - Molmo Architecture: [AllenAI Collection](https://huggingface.co/collections/allenai/molmo-66f379e6fe3b8ef090a8ca19)
 - Pixtral Architecture: [Pixtral Documentation](https://huggingface.co/docs/transformers/model_doc/pixtral)
+- MiniCPM-o-2_6 Architecture: [MiniCPM-o-2_6 Documentation](https://openbmb.notion.site/MiniCPM-o-2-6-A-GPT-4o-Level-MLLM-for-Vision-Speech-and-Multimodal-Live-Streaming-on-Your-Phone-185ede1b7a558042b5d5e45e6b237da9)
+- Vikhr-2-VL: [Vikhr-2-VL Documentation](https://huggingface.co/Vikhrmodels)
+- ExLlamaV2: [ExLlamaV2 Documentation](https://github.com/turboderp-org/exllamav2Vikhrmodels)
+
 
 **Model Credits**  
-[ToriiGate](https://huggingface.co/Minthy) · [LLaVA](https://huggingface.co/llava-hf) · [JoyCaption](https://huggingface.co/fancyfeast) · [Qwen2, Pixtral](https://huggingface.co/Ertugrul) · [Molmo](https://huggingface.co/cyan2k) · [Molmo72b](https://huggingface.co/SeanScripts/Molmo-72B-0924-nf4)
+[ToriiGate](https://huggingface.co/Minthy) · [LLaVA](https://huggingface.co/llava-hf) · [JoyCaption](https://huggingface.co/fancyfeast) · [Qwen2, Pixtral](https://huggingface.co/Ertugrul) · [Molmo](https://huggingface.co/cyan2k) · [Molmo72b](https://huggingface.co/SeanScripts/Molmo-72B-0924-nf4) · [MiniCPM-o-2_6](https://huggingface.co/openbmb/MiniCPM-o-2_6) · [Vikhr-2-VL-2b-Instruct](https://huggingface.co/Vikhrmodels/Vikhr-2-VL-2b-Instruct-experimental) 
 
 Thank you for your interest in ide-cap-chan!
