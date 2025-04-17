@@ -1,11 +1,13 @@
-# ide-cap-chan v0.9minicpmo
+# ide-cap-chan v0.95
 from arg_parser import parse_arguments
-from utils import measure_gpu_speed, split_files_proportionally
-from image_processor import process_images
+from utils import measure_gpu_speed
+from image_processor import process_image_worker
 import torch.multiprocessing as mp
 from os import walk
 from os.path import splitext as split_extension
 from pathlib import Path
+import queue
+import time
 
 def main():
     args = parse_arguments()
@@ -56,8 +58,7 @@ def main():
     input_dir = args.input_dir
     image_extensions = [".jpg", ".png", ".webp", ".jpeg"]
 
-    world_size = len(device_ids)
-
+    # Measure GPU speeds for informational purposes
     gpu_speeds = [(i, measure_gpu_speed(f"cuda:{i}")) for i in device_ids]
 
     print(f'Using GPU ids: {device_ids}')
@@ -67,6 +68,7 @@ def main():
     print(f'Using model: {model_name_or_path} (type: {input_model_type})')
     print(f'Use quantization: {args_dict.get("use_nf4")}')
 
+    # Find existing captions to avoid reprocessing
     existing_captions = []
     for root, _, files in walk(input_dir):
         for file in files:
@@ -75,6 +77,7 @@ def main():
                 path, _ = split_extension(str(file_path))
                 existing_captions.append(path)
 
+    # Create a list of files to process
     filelist = []
     for root, _, files in walk(input_dir):
         for file in files:
@@ -84,10 +87,69 @@ def main():
                 if path not in existing_captions:
                     filelist.append(file_path)
 
-    filelist_chunks = split_files_proportionally(filelist, gpu_speeds)
+    if not filelist:
+        print('There are no files to process.')
+        return
 
-    # Spawn processes, passing the model path and other arguments
-    mp.spawn(process_images, args=(model_name_or_path, input_model_type, filelist_chunks, args_dict), nprocs=world_size, join=True)
+    # Create a shared job queue
+    job_queue = mp.Queue()
+    result_queue = mp.Queue()
+    
+    # Put all files in the job queue
+    for file_path in filelist:
+        job_queue.put(file_path)
+    
+    # Add termination signals (one for each worker)
+    for _ in range(len(device_ids)):
+        job_queue.put(None)
+    
+    # Create and start worker processes
+    processes = []
+    for i, gpu_id in enumerate(device_ids):
+        p = mp.Process(
+            target=process_image_worker,
+            args=(
+                i,  # worker_id
+                gpu_id,  # gpu_id
+                job_queue,
+                result_queue,
+                model_name_or_path,
+                input_model_type,
+                args_dict,
+                len(filelist)  # total_files
+            )
+        )
+        p.start()
+        processes.append(p)
+    
+    # Monitor progress
+    completed_files = 0
+    total_files = len(filelist)
+    start_time = time.time()
+    
+    while completed_files < total_files:
+        try:
+            # Get result from the result queue
+            result = result_queue.get(timeout=1.0)
+            if result is not None:
+                worker_id, gpu_id, file_name, processing_time = result
+                completed_files += 1
+                
+                # Calculate ETA
+                elapsed = time.time() - start_time
+                avg_time_per_file = elapsed / completed_files
+                remaining_time = avg_time_per_file * (total_files - completed_files)
+                
+                print(f"Worker {worker_id} (GPU {gpu_id}): {completed_files}/{total_files} - {file_name} - {processing_time:.2f}s - ETA: {remaining_time:.2f}s")
+        except queue.Empty:
+            # No result available, just continue
+            continue
+    
+    # Wait for all processes to finish
+    for p in processes:
+        p.join()
+    
+    print(f"All {total_files} files processed successfully.")
 
 if __name__ == "__main__":
     main()

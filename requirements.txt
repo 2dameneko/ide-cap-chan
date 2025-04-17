@@ -1,4 +1,4 @@
-¹git+https://github.com/huggingface/transformers #latest, minicpm_o broken (due Loggits deprecated)
+#git+https://github.com/huggingface/transformers #latest, minicpm_o broken (due Loggits deprecated)
 transformers==4.48.3 #last verion minicpmo compatible
 #transformers==4.44.2 #recommended for minicpm_o, but doesn't have support for idefics3
 accelerate==1.4.0

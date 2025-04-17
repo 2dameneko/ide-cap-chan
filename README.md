@@ -64,6 +64,7 @@ Run without arguments for default behavior. Available CLI options (`python ide-c
 `.jpg`, `.png`, `.webp`, `.jpeg`
 
 ## Version History
+* **0.95**: Dynamic multi-GPU task queuing instead of splitting based on approximate GPU speed
 * **0.9**: Added MiniCPM-o-2_6 loader support, rewritten to modular design, pinned versions, 
 * **0.8**: Added ExLlama2 loader support (default), ToriiGate-v0.4 features, Molmo-72B auto-split
 * **0.7**: Added Molmo/Qwen2VL/Pixtral support, improved multi-GPU quant processing, code refactor

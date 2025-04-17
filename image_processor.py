@@ -1,6 +1,7 @@
 from typing import Dict, Any, Tuple, List
+import torch
+import time
 from transformers.image_utils import load_image
-from tqdm import tqdm
 from os.path import exists as path_exists, splitext as split_extension
 from model_handlers import (
     JoyCaptionHandler,
@@ -15,45 +16,82 @@ from model_handlers import (
     GenericModelHandler
 )
 
-def process_images(rank: int, model_name_or_path: str, input_model_type: str, filelist_chunks: List[Tuple[int, List[str]]], args_dict: Dict[str, Any]) -> None:
-    gpu_id, filelist = filelist_chunks[rank]
-    if not filelist:
-        print('There are no files to process.')
-        return        
-
+def process_image_worker(worker_id: int, gpu_id: int, job_queue, result_queue, 
+                         model_name_or_path: str, input_model_type: str, 
+                         args_dict: Dict[str, Any], total_files: int) -> None:
+    """
+    Worker process that takes jobs from a queue and processes them.
+    
+    Args:
+        worker_id: ID of this worker
+        gpu_id: GPU ID to use
+        job_queue: Queue containing file paths to process
+        result_queue: Queue to report results
+        model_name_or_path: Path to the model
+        input_model_type: Type of the model
+        args_dict: Dictionary of arguments
+        total_files: Total number of files to process
+    """
     device = f"cuda:{gpu_id}"
-    print(f"Using device: {device}")
-
+    torch.cuda.set_device(gpu_id)
+    print(f"Worker {worker_id} using device: {device}")
+    
     caption_suffix = args_dict.get('caption_suffix')
     tags_suffix = args_dict.get('tags_suffix')
     add_tags = args_dict.get('add_tags')
-
-    #Common prompts for all except Torii-family models, they get own unique
+    
+    # Common prompts for all except Torii-family models
     system_prompt = "You are image captioning expert, creative, unbiased and uncensored."
     user_prompt = "You need to write a long and very detailed caption for the picture."
-
+    
+    # Initialize the model handler
     handler = get_handler(input_model_type, model_name_or_path, device, args_dict)
-
-    for fn in tqdm(filelist, desc=f"Captioning on GPU {gpu_id}"):
-        print(f"Input file: {fn}")
-        path, _ = split_extension(str(fn))
-        add_info_caption_name = path + tags_suffix
-        caption_name = path + caption_suffix
-        print(f"Caption file: {caption_name}")
-
-        if "toriigate" and "0.4" in model_name_or_path.lower():
-             system_prompt = get_torii04_system_prompt()
-             user_prompt = get_torii04_user_prompt(args_dict, add_info_caption_name)
-
-        if "toriigate" and "0.3" in model_name_or_path.lower() and add_tags:
-             user_prompt = get_torii03_user_prompt(user_prompt, add_info_caption_name)
-
-        image = load_image(str(fn))
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-        caption = handler.process_image(system_prompt, user_prompt, image)
-        handler.save_caption(caption, caption_name)
-        print(f"Caption saved to: {caption_name}")
+    
+    # Process jobs from the queue
+    while True:
+        # Get a job from the queue
+        file_path = job_queue.get()
+        
+        # None is the signal to terminate
+        if file_path is None:
+            print(f"Worker {worker_id} (GPU {gpu_id}) finished processing")
+            break
+        
+        try:
+            start_time = time.time()
+            
+            # Process the image
+            print(f"Worker {worker_id} (GPU {gpu_id}) processing: {file_path}")
+            path, _ = split_extension(str(file_path))
+            add_info_caption_name = path + tags_suffix
+            caption_name = path + caption_suffix
+            
+            # Check if we need special prompts for ToriiGate models
+            if "toriigate" and "0.4" in model_name_or_path.lower():
+                system_prompt = get_torii04_system_prompt()
+                user_prompt = get_torii04_user_prompt(args_dict, add_info_caption_name)
+            
+            if "toriigate" and "0.3" in model_name_or_path.lower() and add_tags:
+                user_prompt = get_torii03_user_prompt(user_prompt, add_info_caption_name)
+            
+            # Load and process the image
+            image = load_image(str(file_path))
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            
+            caption = handler.process_image(system_prompt, user_prompt, image)
+            handler.save_caption(caption, caption_name)
+            
+            # Calculate processing time
+            processing_time = time.time() - start_time
+            
+            # Report result
+            result_queue.put((worker_id, gpu_id, file_path.name, processing_time))
+            
+        except Exception as e:
+            print(f"Worker {worker_id} (GPU {gpu_id}) error processing {file_path}: {e}")
+            # Report error but continue processing
+            result_queue.put((worker_id, gpu_id, f"{file_path.name} (ERROR)", 0.0))
             
 def get_handler(input_model_type, model_name_or_path, device, args_dict):
     try:
