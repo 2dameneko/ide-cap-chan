@@ -1,4 +1,4 @@
-# ide-cap-chan v0.95
+# ide-cap-chan v0.96
 from arg_parser import parse_arguments
 from utils import measure_gpu_speed
 from image_processor import process_image_worker
