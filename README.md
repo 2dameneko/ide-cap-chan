@@ -1,8 +1,6 @@
 # ide-cap-chan
 
-<div align="center">
-    <img src="https://count.getloli.com/get/@ide-cap-chan?theme=asoul&padding=4" alt="Visitor count"><br>
-</div>
+## OBSOLETE as of 2026. Use [gem-cap-chan](https://github.com/2dameneko/gem-cap-chan) for nlp-captioning with any modern VL-capable model or [tor-cap-chan](https://github.com/2dameneko/tor-cap-chan) for nlp-captioning with ToriiGate-v0.5
 
 ide-cap-chan is a utility for batch captioning images with natural language using various Vision-Language (VL) models.
 
